@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./pages/Layout";
 import AddEvento from "./pages/Evento/AddEvento";
+import ListaDeEventos from "./pages/Evento/ListaDeEventos";
 
 export default function AppRouter() {
     return (
@@ -8,6 +9,7 @@ export default function AppRouter() {
             <Routes>
                 <Route path="/" Component={ Layout }>
                   <Route path="evento/cadastrar" Component={ AddEvento } />
+                  <Route path="evento/listar" Component={ ListaDeEventos } />
                     {/* <Route
                         path="/"
                         element={<Navigate to="/enderecos/lista" replace />}
