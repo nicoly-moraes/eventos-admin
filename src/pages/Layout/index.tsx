@@ -12,7 +12,9 @@ export default function Layout() {
         {/* TOP Nav Bar END */}
         {/* Page Content  */}
         <div id="content-page" className="content-page">
-          <div className="container-fluid"></div>
+          <div className="container-fluid">
+            <Outlet/>
+          </div>
         </div>
       </div>
     </>
