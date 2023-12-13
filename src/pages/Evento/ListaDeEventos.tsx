@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import logo from "../../assets/images/logo.png";
 import { useEffect, useState } from "react";
-import { listarEventos } from "./evento.service";
+import { excluirEvento, listarEventos } from "./evento.service";
 import { Evento } from "./evento.types";
+import { confirm, toast } from "../../helpers/alert.helper";
 
 export default function ListaDeEventos() {
   const [eventos, setEventos] = useState([] as Evento[]);
@@ -13,6 +13,28 @@ export default function ListaDeEventos() {
         setEventos(dados);
       });
   }, []);
+
+  const formatarCep = (cep: number) => {
+    const cepArray = cep.toString().split('');
+    cepArray.splice(5, 0, '-');
+    return cepArray.join('');
+  }
+
+  const deletarEvento = (evento: Evento) => {
+    if (evento.id != undefined) {
+      confirm('warning',`Confirmar exclusão do Evento: ${evento.nome}`)
+        .then((result) => {
+            if (result.isConfirmed) {
+              excluirEvento(evento.id)
+                .then(() => {
+                    const filtro = eventos.filter(item => item.id != evento.id);
+                    setEventos(filtro);
+                    toast('success', 'Evento excluído com sucesso');
+                });
+            }
+        })
+    }
+  }
 
   return (
     <div className="row">
@@ -43,11 +65,11 @@ export default function ListaDeEventos() {
                   </tr>
                 </thead>
                 <tbody>
-                  {eventos.map((item) => {
+                  {eventos.map((item, index) => {
                     return (
-                      <tr>
+                      <tr key={index}>
                         <td className="align-middle">
-                          <img src={logo} alt="imagem nome do evento" height="50px" />
+                          <img src={`http://localhost:8080${item.img}`} alt="imagem nome do evento" height="50px" />
                         </td>
                         <td className="align-middle">
                           {item.nome}
@@ -56,19 +78,36 @@ export default function ListaDeEventos() {
                           {item.data}
                         </td>
                         <td className="align-middle">
-                          Logradouro, numero, complemento, bairro, cidade - uf, cep
+                          {item.endereco.logradouro + ', '} 
+                          {item.endereco.numero ? item.endereco.numero + ', ' : ''} 
+                          {item.endereco.complemento ? item.endereco.complemento + ', ' : ''} 
+                          {item.endereco.cidade + '-'}
+                          {item.endereco.uf + ', '} 
+                          {formatarCep(item.endereco.cep)}
                         </td>
-                        <td className="align-middle">
-                          <button className="btn btn-primary btn-sm mx-1">
-                            <i className="fa fa-edit m-0"></i>
-                          </button>
-                          <button className="btn btn-danger btn-sm mx-1">
+                        <td className="align-middle" width="140px">
+                          <Link to={`/evento/${item.id}/setor/listar`}>
+                            <button className="btn btn-secondary btn-sm mx-1" title="Setores do evento">
+                              <i className="ri-treasure-map-line m-0"></i>
+                            </button>
+                          </Link>
+                          <Link to={`/evento/atualizar/${item.id}`}>
+                            <button className="btn btn-primary btn-sm mx-1" title="Editar evento">
+                              <i className="fa fa-edit m-0"></i>
+                            </button>
+                          </Link>
+                          <button className="btn btn-danger btn-sm mx-1" title="Excluir evento" onClick={() => deletarEvento(item)}>
                             <i className="fa fa-trash-o m-0"></i>
                           </button>
                         </td>
                       </tr>
                     )
                   })}
+                  {eventos.length == 0 &&
+                    <tr>
+                      <td className="text-center" colSpan={2}>Nenhum evento cadastrado</td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>

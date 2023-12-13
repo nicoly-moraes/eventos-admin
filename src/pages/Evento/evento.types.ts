@@ -1,9 +1,10 @@
 export interface Evento {
+  id: number;
   nome: string;
   data: string;
   sobre: string;
-  imagem: string;
-  capa: string;
+  img?: string;
+  capa?: string;
   endereco: Endereco;
 }
 

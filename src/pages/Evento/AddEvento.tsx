@@ -1,8 +1,10 @@
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { estados } from "./estados.data";
 import { toast } from "../../helpers/alert.helper";
-import { criarEvento } from "./evento.service";
+import { criarEvento, listarEventos } from "./evento.service";
 import { Evento } from "./evento.types";
+import InputMask from 'react-input-mask';
+import { useNavigate } from "react-router-dom";
 
 export default function AddEvento() {
   const [nome, setNome] = useState('');
@@ -17,6 +19,8 @@ export default function AddEvento() {
   const [descricao, setDescricao] = useState('');
   const [imagem, setImagem] = useState('');
   const [capa, setCapa] = useState('');
+  const [id] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
 
@@ -34,6 +38,31 @@ export default function AddEvento() {
       if (file) {
         reader.readAsDataURL(file);
       }
+    }
+  }
+
+  const obterEnderecoDoCEP = (cep: string) => {
+    const url = `https://viacep.com.br/ws/${cep}/json/`;
+    return fetch(url, { method: 'GET' });
+  }
+
+  const cepAlterado = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value.replace('-', '');
+    setCep(value);
+    if (value.length == 8) {
+      obterEnderecoDoCEP(value)
+        .then((res) => {
+          return res.json();
+        })
+        .then((endereco) => {
+          setLogradouro(endereco.logradouro);
+          // setBairro(endereco.bairro);
+          setCidade(endereco.localidade);
+          setUf(endereco.uf);
+        })
+        .catch((erro) => {
+
+        });
     }
   }
 
@@ -67,16 +96,55 @@ export default function AddEvento() {
       return;
     }
 
-    // continuar validações
+    if (sobre === '') {
+      toast('error', 'Sobre é obrigatório');
+      return;
+    }
+
+    if (cep === '') {
+      toast('error', 'Cep é obrigatório');
+      return;
+    }
+
+    if (logradouro === '') {
+      toast('error', 'Logradouro é obrigatório');
+      return;
+    }
+
+    if (cidade === '') {
+      toast('error', 'Cidade é obrigatório');
+      return;
+    }
+
+    if (uf === '') {
+      toast('error', 'Estado é obrigatório');
+      return;
+    }
+
+    if (descricao === '') {
+      toast('error', 'Descricao é obrigatório');
+      return;
+    }
+
+    if (imagem === '') {
+      toast('error', 'Imagem é obrigatório');
+      return;
+    }
+
+    if (capa === '') {
+      toast('error', 'Capa é obrigatório');
+      return;
+    }
 
     const dados: Evento = {
+      id: Number(id),
       nome,
       data,
       sobre,
-      imagem,
+      img: imagem,
       capa,
       endereco: {
-        cep: parseInt(cep.replace('-', '')),
+        cep: parseInt(cep),
         logradouro,
         numero: numero ? parseInt(numero) : undefined,
         complemento,
@@ -90,6 +158,7 @@ export default function AddEvento() {
       .then(() => {
         form.reset();
         toast('success', 'Evento cadastrado');
+        navigate("/evento/listar");
       })
       .catch((error) => {
         console.error(error);
@@ -117,7 +186,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="nome"
                       placeholder="Nome do evento"
-                      onChange={(event) => setNome(event.target.value)} 
+                      onChange={(event) => setNome(event.target.value)}
                       value={nome}
                     />
                     <div className="invalid-feedback">
@@ -131,7 +200,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="data"
                       placeholder="Data e hora do evento"
-                      onChange={(event) => setData(event.target.value)} 
+                      onChange={(event) => setData(event.target.value)}
                       value={data}
                     />
                   </div>
@@ -141,7 +210,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="sobre"
                       placeholder="Sobre o evento"
-                      onChange={(event) => setSobre(event.target.value)} 
+                      onChange={(event) => setSobre(event.target.value)}
                       value={sobre}
                     />
                   </div>
@@ -151,12 +220,13 @@ export default function AddEvento() {
                 <div className="row">
                   <div className="form-group col-lg-3">
                     <label htmlFor="cep">CEP</label>
-                    <input
+                    <InputMask
+                      mask="99999-999"
+                      maskChar=""
                       type="text"
                       className="form-control"
-                      id="cep"
-                      placeholder="CEP do evento"
-                      onChange={(event) => setCep(event.target.value)} 
+                      id="inputCep"
+                      onChange={cepAlterado}
                       value={cep}
                     />
                   </div>
@@ -167,7 +237,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="logradouro"
                       placeholder="Rua, Av. e etc"
-                      onChange={(event) => setLogradouro(event.target.value)} 
+                      onChange={(event) => setLogradouro(event.target.value)}
                       value={logradouro}
                     />
                   </div>
@@ -178,7 +248,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="numero"
                       placeholder="Número do endereço"
-                      onChange={(event) => setNumero(event.target.value)} 
+                      onChange={(event) => setNumero(event.target.value)}
                       value={numero}
                     />
                   </div>
@@ -189,7 +259,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="complemento"
                       placeholder="Complemento do endereço"
-                      onChange={(event) => setComplemento(event.target.value)} 
+                      onChange={(event) => setComplemento(event.target.value)}
                       value={complemento}
                     />
                   </div>
@@ -200,23 +270,23 @@ export default function AddEvento() {
                       className="form-control"
                       id="cidade"
                       placeholder="Cidade do evento"
-                      onChange={(event) => setCidade(event.target.value)} 
+                      onChange={(event) => setCidade(event.target.value)}
                       value={cidade}
                     />
                   </div>
                   <div className="form-group col-lg-6">
                     <label htmlFor="uf">Estado</label>
-                    <select 
-                      className="form-control" 
+                    <select
+                      className="form-control"
                       id="uf"
-                      onChange={(event) => setUf(event.target.value)} 
+                      onChange={(event) => setUf(event.target.value)}
                       value={uf}>
-                        <option hidden>Selecione o estado</option>
-                        {estados.map((item, index) => {
-                          return (
-                            <option key={index} value={item.uf}>{item.nome}</option>
-                          )
-                        })}
+                      <option hidden>Selecione o estado</option>
+                      {estados.map((item, index) => {
+                        return (
+                          <option key={index} value={item.uf}>{item.nome}</option>
+                        )
+                      })}
                     </select>
                   </div>
                   <div className="form-group col-lg-12">
@@ -226,7 +296,7 @@ export default function AddEvento() {
                       className="form-control"
                       id="descricao"
                       placeholder="Descrição do endereço"
-                      onChange={(event) => setDescricao(event.target.value)} 
+                      onChange={(event) => setDescricao(event.target.value)}
                       value={descricao}
                     />
                   </div>
@@ -243,6 +313,7 @@ export default function AddEvento() {
                         type="file"
                         className="custom-file-input"
                         id="inputGroupImagem"
+                        accept="image/*"
                         onChange={(event) => imagemAlterada(event.target.files)}
                       />
                       <label
@@ -252,12 +323,12 @@ export default function AddEvento() {
                         Escolher Imagem
                       </label>
                     </div>
-                    {imagem && 
+                    {imagem &&
                       <div className="w-100">
-                        <img 
-                          src={imagem} 
-                          alt="Imagem principal" 
-                          width="200px" 
+                        <img
+                          src={imagem}
+                          alt="Imagem principal"
+                          width="200px"
                           className="img-thumbnail mt-3 mb-3" />
                       </div>
                     }
@@ -271,6 +342,7 @@ export default function AddEvento() {
                         type="file"
                         className="custom-file-input"
                         id="inputGroupCapa"
+                        accept="image/*"
                         onChange={(event) => capaAlterada(event.target.files)}
                       />
                       <label
@@ -280,10 +352,10 @@ export default function AddEvento() {
                         Escolher Capa
                       </label>
                     </div>
-                    {capa && 
+                    {capa &&
                       <div className="w-100">
-                        <img 
-                          src={capa} 
+                        <img
+                          src={capa}
                           alt="Imagem capa"
                           className="border rounded p-1 mt-3 mb-3"
                           height="200px" />
