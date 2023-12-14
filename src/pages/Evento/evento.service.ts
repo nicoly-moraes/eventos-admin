@@ -21,7 +21,12 @@ export async function listarEventoPorId(id: number) {
     method: "GET"
   }
   return fetch(`${url}/${id}` , request)
-    .then((res) => res.json());
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      throw new Error('Evento não encontrado')
+    });
 }
 
 export async function criarEvento(evento: Evento) {

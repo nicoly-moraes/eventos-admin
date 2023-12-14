@@ -212,6 +212,7 @@ export default function AddEvento() {
                       placeholder="Sobre o evento"
                       onChange={(event) => setSobre(event.target.value)}
                       value={sobre}
+                      maxLength={500}
                     />
                   </div>
                 </div>

@@ -11,6 +11,8 @@ import AddIngresso from "./pages/Ingresso/AddIngresso";
 import ListaDeIngressos from "./pages/Ingresso/ListaDeIngressos";
 import EditIngresso from "./pages/Ingresso/EditIngresso";
 import Eventos from "./pages/Site/Eventos";
+import DetalhesDoEvento from "./pages/Site/DetalhesDoEvento";
+import Pedidos from "./pages/Pedidos";
 
 export default function AppRouter() {
     return (
@@ -18,7 +20,9 @@ export default function AppRouter() {
             <Routes>
                 <Route path="site" Component={ Site }>
                   <Route path="eventos" Component={ Eventos } />
+                  <Route path="eventos/:id" Component={DetalhesDoEvento}/>
                 </Route>
+
                 <Route path="/" Component={ Layout }>
                   {/* Evento */}
                   <Route path="evento/listar" Component={ ListaDeEventos } />
@@ -35,10 +39,9 @@ export default function AppRouter() {
                   <Route path="setor/ingresso/cadastrar/:setorId" Component={ AddIngresso } />
                   <Route path="setor/ingresso/atualizar/:ingressoId" Component={ EditIngresso } />
 
-                    {/* <Route
-                        path="/"
-                        element={<Navigate to="/enderecos/lista" replace />}
-                   */}
+                  {/* Pedido */}
+                  <Route path="pedidos" Component={ Pedidos } />
+
                 </Route>
             </Routes>
         </Router>

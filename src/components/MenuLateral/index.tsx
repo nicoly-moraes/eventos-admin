@@ -12,11 +12,17 @@ export default function MenuLateral() {
   const location = useLocation();
   const [menu, setMenu] = useState<Menu[]>([
     {
-      icone: 'ri-user-line',
+      icone: 'las la-calendar-check',
       texto: 'Eventos',
       para: '/evento/listar',
       ativo: false
-    }
+    },
+    {
+      icone: 'las la-ticket-alt',
+      texto: 'Pedidos',
+      para: '/pedidos',
+      ativo: false
+    },
   ]);
 
   useEffect(() => {
